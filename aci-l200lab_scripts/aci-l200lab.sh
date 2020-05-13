@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # script name: aci-l200lab.sh
-# Version v0.1.0 20200508
+# Version v0.1.2 20200513
 # Set of tools to deploy L200 Azure containers labs
 
 # "-g|--resource-group" resource group name
@@ -54,7 +54,7 @@ done
 # Variable definition
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPT_NAME="$(echo $0 | sed 's|\.\/||g')"
-SCRIPT_VERSION="Version v0.1.0 20200508"
+SCRIPT_VERSION="Version v0.1.2 20200513"
 
 # Funtion definition
 
@@ -155,12 +155,14 @@ EOF
 }
 
 function lab_scenario_1_validation () {
+    echo -e "\n+++++++++++++++++++++++++++++++++++++++++++++++++++"
+    echo -e "Running validation for Lab scenario $LAB_SCENARIO\n"
     validate_aci_exists
     ACI_STATUS=$(az container show -g $RESOURCE_GROUP -n appcontaineryaml &>/dev/null; echo $?)
     if [ $ACI_STATUS -eq 0 ]
     then
         echo -e "\n\n========================================================"
-        echo -e "\nContainer instance \"appcontaineryaml\" looks good now, the keyword for the assesment is:\n\nbuttery rouge briskly\n"
+        echo -e '\nContainer instance "appcontaineryaml" looks good now, the keyword for the assesment is:\n\nbJH5$Rth=Ht35%ZC\n'
     else
         echo -e "\nScenario $LAB_SCENARIO is still FAILED\n\n"
         echo -e "The yaml file aci.yaml is in your current path, you have to modified it in order to be able to deploy the second container instance \"appcontaineryaml\"\n"
@@ -169,6 +171,77 @@ function lab_scenario_1_validation () {
     fi
 }
 
+# Lab scenario 2
+function lab_scenario_2 () {
+    echo -e "Deploying scenario for lab2...\n"
+    az container create \
+    --name $ACI_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --image alpine \
+    --ports 80 \
+    -o table
+
+    validate_aci_exists
+    ACI_URI=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query id -o tsv 2>/dev/null)
+    
+    echo -e "\n\n********************************************************"
+    echo -e "An ACI has been deployed with name $ACI_NAME in the resourece group $RESOURCE_GROUP, and it keeps restarting."
+    echo -e "Looks like it was deployed with the wrong image."
+    echo -e "You have to update the ACI to change the image to nginx.\n"
+    echo -e "ACI URI=${ACI_URI}\n"
+}
+
+function lab_scenario_2_validation () {
+    echo -e "\n+++++++++++++++++++++++++++++++++++++++++++++++++++"
+    echo -e "Running validation for Lab scenario $LAB_SCENARIO\n"
+    validate_aci_exists
+    ACI_IMAGE="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].image -o tsv)"
+    RESTART_COUNT="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].instanceView.restartCount -o tsv)"
+    ACI_STATUS=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME &>/dev/null; echo $?)
+    if [ $ACI_STATUS -eq 0 ] && [ "$ACI_IMAGE" == "nginx" ] && [ $RESTART_COUNT -eq 0 ]
+    then
+        echo -e "\n\n========================================================"
+        echo -e "\nContainer instance \"${ACI_NAME}\" looks good now, the keyword for the assesment is:\n\njpDajuBxs69Ky28z\n"
+    else
+        echo -e "\nScenario $LAB_SCENARIO is still FAILED\n\n"
+    fi
+}
+
+# Lab scenario 3
+function lab_scenario_3 () {
+    echo -e "Deploying scenario for lab2...\n"
+    az container create \
+    --name $ACI_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --image alpine \
+    --ports 80 \
+    -o table
+
+    validate_aci_exists
+    ACI_URI=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query id -o tsv 2>/dev/null)
+    
+    echo -e "\n\n********************************************************"
+    echo -e "An ACI has been deployed with name $ACI_NAME in the resourece group $RESOURCE_GROUP, and it keeps restarting."
+    echo -e "Looks like it was deployed with the wrong image."
+    echo -e "You have to update the ACI to change the image to nginx.\n"
+    echo -e "ACI URI=${ACI_URI}\n"
+}
+
+function lab_scenario_3_validation () {
+    echo -e "\n+++++++++++++++++++++++++++++++++++++++++++++++++++"
+    echo -e "Running validation for Lab scenario $LAB_SCENARIO\n"
+    validate_aci_exists
+    ACI_IMAGE="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].image -o tsv)"
+    RESTART_COUNT="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].instanceView.restartCount -o tsv)"
+    ACI_STATUS=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME &>/dev/null; echo $?)
+    if [ $ACI_STATUS -eq 0 ] && [ "$ACI_IMAGE" == "nginx" ] && [ $RESTART_COUNT -eq 0 ]
+    then
+        echo -e "\n\n========================================================"
+        echo -e "\nContainer instance \"${ACI_NAME}\" looks good now, the keyword for the assesment is:\n\njpDajuBxs69Ky28z\n"
+    else
+        echo -e "\nScenario $LAB_SCENARIO is still FAILED\n\n"
+    fi
+}
 
 #if -h | --help option is selected usage will be displayed
 if [ $HELP -eq 1 ]
@@ -177,6 +250,8 @@ then
     echo -e "\nHere is the list of current labs available:\n
 ***************************************************************
 *\t 1. ACI deployment on existing resource group fails
+*\t 2. ACI deployed with wrong image
+*\t 3. 
 ***************************************************************\n"
     echo -e '"-g|--resource-group" resource group name
 "-l|--lab" Lab scenario to deploy
@@ -205,16 +280,18 @@ if [ -z $LAB_SCENARIO ]; then
     echo -e "\nHere is the list of current labs available:\n
 ***************************************************************
 *\t 1. ACI deployment on existing resource group fails
+*\t 2. ACI deployed with wrong image
+*\t 3. 
 ***************************************************************\n"
 	exit 9
 fi
 
 # lab scenario has a valid option
-#if [[ ! $LAB_SCENARIO =~ ^[1-5]+$ ]];
-if [[ ! $LAB_SCENARIO -eq 1 ]];
+if [[ ! $LAB_SCENARIO =~ ^[1-3]+$ ]];
+#if [[ ! $LAB_SCENARIO -eq 1 ]];
 then
-    #echo -e "\nError: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 5\n"
-    echo -e "\nError: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value of 1\n"
+    echo -e "\nError: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 3\n"
+    #echo -e "\nError: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value of 1\n"
     exit 10
 fi
 
@@ -236,6 +313,25 @@ then
 elif [ $LAB_SCENARIO -eq 1 ] && [ $VALIDATE -eq 1 ]
 then
     lab_scenario_1_validation
+    
+elif [ $LAB_SCENARIO -eq 2 ] && [ $VALIDATE -eq 0 ]
+then
+    check_resourcegroup_aci
+    lab_scenario_2
+
+elif [ $LAB_SCENARIO -eq 2 ] && [ $VALIDATE -eq 1 ]
+then
+    lab_scenario_2_validation
+
+elif [ $LAB_SCENARIO -eq 3 ] && [ $VALIDATE -eq 0 ]
+then
+    check_resourcegroup_aci
+    lab_scenario_3
+
+elif [ $LAB_SCENARIO -eq 3 ] && [ $VALIDATE -eq 1 ]
+then
+    lab_scenario_3_validation
+
 else
     echo -e "\nError: no valid option provided\n"
     exit 11

@@ -22,6 +22,8 @@ Here is the list of current labs available:
 
 ***************************************************************
 *        1. ACI deployment on existing resource group fails
+*        2. ACI deployed with wrong image
+*        3.
 ***************************************************************
 
 "-g|--resource-group" resource group name
