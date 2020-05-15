@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # script name: aci-l200lab.sh
-# Version v0.1.2 20200513
+# Version v0.1.3 20200515
 # Set of tools to deploy L200 Azure containers labs
 
 # "-g|--resource-group" resource group name
@@ -54,7 +54,7 @@ done
 # Variable definition
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPT_NAME="$(echo $0 | sed 's|\.\/||g')"
-SCRIPT_VERSION="Version v0.1.2 20200513"
+SCRIPT_VERSION="Version v0.1.3 20200515"
 
 # Funtion definition
 
@@ -209,21 +209,19 @@ function lab_scenario_2_validation () {
 
 # Lab scenario 3
 function lab_scenario_3 () {
-    echo -e "Deploying scenario for lab2...\n"
+    echo -e "Deploying scenario for lab3...\n"
     az container create \
     --name $ACI_NAME \
     --resource-group $RESOURCE_GROUP \
-    --image alpine \
-    --ports 80 \
+    --image sturrent/acilab3:latest \
     -o table
 
     validate_aci_exists
     ACI_URI=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query id -o tsv 2>/dev/null)
     
     echo -e "\n\n********************************************************"
-    echo -e "An ACI has been deployed with name $ACI_NAME in the resourece group $RESOURCE_GROUP, and it keeps restarting."
-    echo -e "Looks like it was deployed with the wrong image."
-    echo -e "You have to update the ACI to change the image to nginx.\n"
+    echo -e "An ACI has been deployed with name $ACI_NAME in the resourece group $RESOURCE_GROUP."
+    echo -e "The logs of this container instance have some interensting infromation."
     echo -e "ACI URI=${ACI_URI}\n"
 }
 
@@ -231,16 +229,8 @@ function lab_scenario_3_validation () {
     echo -e "\n+++++++++++++++++++++++++++++++++++++++++++++++++++"
     echo -e "Running validation for Lab scenario $LAB_SCENARIO\n"
     validate_aci_exists
-    ACI_IMAGE="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].image -o tsv)"
-    RESTART_COUNT="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].instanceView.restartCount -o tsv)"
-    ACI_STATUS=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME &>/dev/null; echo $?)
-    if [ $ACI_STATUS -eq 0 ] && [ "$ACI_IMAGE" == "nginx" ] && [ $RESTART_COUNT -eq 0 ]
-    then
-        echo -e "\n\n========================================================"
-        echo -e "\nContainer instance \"${ACI_NAME}\" looks good now, the keyword for the assesment is:\n\njpDajuBxs69Ky28z\n"
-    else
-        echo -e "\nScenario $LAB_SCENARIO is still FAILED\n\n"
-    fi
+    echo -e "\n\n========================================================"
+    echo -e "\You will get what you are looking for from the container application logs...\n"
 }
 
 #if -h | --help option is selected usage will be displayed
@@ -251,7 +241,7 @@ then
 ***************************************************************
 *\t 1. ACI deployment on existing resource group fails
 *\t 2. ACI deployed with wrong image
-*\t 3. 
+*\t 3. ACI checking container logs
 ***************************************************************\n"
     echo -e '"-g|--resource-group" resource group name
 "-l|--lab" Lab scenario to deploy
