@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # script name: aci-l200lab.sh
-# Version v0.1.4 20200707
+# Version v0.1.5 20200709
 # Set of tools to deploy L200 Azure containers labs
 
 # "-g|--resource-group" resource group name
@@ -54,7 +54,7 @@ done
 # Variable definition
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPT_NAME="$(echo $0 | sed 's|\.\/||g')"
-SCRIPT_VERSION="Version v0.1.4 20200707"
+SCRIPT_VERSION="Version v0.1.5 20200709"
 
 # Funtion definition
 
@@ -198,7 +198,7 @@ function lab_scenario_2_validation () {
     ACI_IMAGE="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].image -o tsv)"
     RESTART_COUNT="$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query containers[].instanceView.restartCount -o tsv)"
     ACI_STATUS=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME &>/dev/null; echo $?)
-    if [ $ACI_STATUS -eq 0 ] && [[ "$ACI_IMAGE" == "nginx" || "$ACI_IMAGE" == "nginx:alpine" ]] && [ $RESTART_COUNT -eq 0 ]
+    if [ $ACI_STATUS -eq 0 ] && [[ "$ACI_IMAGE" == "nginx"* ]] && [ $RESTART_COUNT -eq 0 ]
     then
         echo -e "\n\n========================================================"
         echo -e "\nContainer instance \"${ACI_NAME}\" looks good now, the keyword for the assesment is:\n\njpDajuBxs69Ky28z\n"
