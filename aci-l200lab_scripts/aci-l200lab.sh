@@ -146,7 +146,7 @@ EOF
     ERROR_MESSAGE="$(az container create --resource-group $RESOURCE_GROUP --file aci.yaml 2>&1)"
     
     echo -e "\n\n********************************************************"
-    echo -e "Customer has an ACI alredy deployed in the resourece group $RESOURCE_GROUP and he wants to deploy another one in the same resource group using the following:"
+    echo -e "Customer has an ACI alredy deployed in the resource group $RESOURCE_GROUP and he wants to deploy another one in the same resource group using the following:"
     echo -e "az container create --resource-group $RESOURCE_GROUP --file aci.yaml\n"
     echo -e "He is getting the error message:\n $ERROR_MESSAGE \n"
     echo -e "The yaml file aci.yaml is in your current path, you have to modified it in order to be able to deploy the second container instance \"appcontaineryaml\"\n"
@@ -221,7 +221,7 @@ function lab_scenario_3 () {
     
     echo -e "\n\n********************************************************"
     echo -e "An ACI has been deployed with name $ACI_NAME in the resourece group $RESOURCE_GROUP."
-    echo -e "The logs of this container instance have some interensting infromation."
+    echo -e "The logs of this container instance have some interensting information."
     echo -e "ACI URI=${ACI_URI}\n"
 }
 
